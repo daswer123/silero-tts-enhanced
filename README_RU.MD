@@ -86,23 +86,54 @@ python -m silero_tts [параметры]
 ```python
 from silero_tts.silero_tts import SileroTTS
 
-# Инициализация объекта TTS
-tts = SileroTTS(model_id='v4_ru', language='ru', speaker='aidar', sample_rate=48000, device='cpu')
+# Get available models
+models = SileroTTS.get_available_models()
+print("Available models:", models)
 
-# Синтез речи из текста
-text = "Привет, мир!"
+# Get available languages
+languages = SileroTTS.get_available_languages()
+print("Available languages:", languages)
+
+# Get the latest model for a specific language
+latest_model = SileroTTS.get_latest_model('ru')
+print("Latest model for Russian:", latest_model)
+
+# Get available sample rates for a specific model and language
+sample_rates = SileroTTS.get_available_sample_rates_static('ru', latest_model)
+print("Available sample rates for the latest Russian model:", sample_rates)
+
+# Initialize the TTS object
+tts = SileroTTS(model_id='v3_en', language='en', speaker='en_2', sample_rate=48000, device='cpu')
+
+# Synthesize speech from text
+text = "Hello world!"
 tts.tts(text, 'output.wav')
 
-# Синтез речи из текстового файла
+# Synthesize speech from a text file
 # tts.from_file('input.txt', 'output.wav')
 
-# Получение доступных моделей
-models = SileroTTS.get_available_models()
-print(models)
-
-# Получение доступных голосов для модели
+# Get available speakers for the current model
 speakers = tts.get_available_speakers()
-print(speakers)
+print("Available speakers for the current model:", speakers)
+
+# Change the language
+tts.change_language('en')
+print("Language changed to:", tts.language)
+print("New model ID:", tts.model_id)
+print("New available speakers:", tts.get_available_speakers())
+
+# Change the model
+tts.change_model('v3_en')
+print("Model changed to:", tts.model_id)
+print("New available speakers:", tts.get_available_speakers())
+
+# Change the speaker
+tts.change_speaker('en_0')
+print("Speaker changed to:", tts.speaker)
+
+# Change the sample rate
+tts.change_sample_rate(24000)
+print("Sample rate changed to:", tts.sample_rate)
 ```
 
 ## Особенности CLI

@@ -90,6 +90,64 @@ class SileroTTS:
             logger.error(f"Speaker '{self.speaker}' is not supported for model '{self.model_id}'. Supported speakers: {self.tts_model.speakers}")
             raise ValueError(f"Speaker '{self.speaker}' is not supported for model '{self.model_id}'. Supported speakers: {self.tts_model.speakers}")
 
+    
+    def change_language(self, language):
+        if language not in self.get_available_languages():
+            logger.error(f"Language '{language}' is not supported.")
+            logger.info(f"Available languages: {', '.join(self.get_available_languages())}")
+            return
+
+        self.language = language
+        self.model_id = self.get_latest_model(language)
+        available_sample_rates = self.get_available_sample_rates()
+        self.sample_rate = max(available_sample_rates)
+        self.tts_model,_= self.init_model()
+        self.speaker = self.tts_model.speakers[0]
+        self.validate_model()
+
+        logger.success(f"Language changed to: {language}. Using the latest model: {self.model_id}")
+        logger.info(f"Available speakers for the new model: {', '.join(self.get_available_speakers())}")
+        logger.info(f"Sample rate set to the highest available: {self.sample_rate}")
+
+    def change_model(self, model_id):
+        if model_id not in self.get_available_models()[self.language]:
+            logger.error(f"Model '{model_id}' is not available for language '{self.language}'.")
+            logger.info(f"Available models for {self.language}: {', '.join(self.get_available_models()[self.language])}")
+            return
+
+        self.model_id = model_id
+        available_sample_rates = self.get_available_sample_rates()
+        self.sample_rate = max(available_sample_rates)
+        self.tts_model,_ = self.init_model()
+        self.speaker = self.tts_model.speakers[0]
+        self.validate_model()
+
+        logger.success(f"Model changed to: {model_id}")
+        logger.info(f"Available speakers for the new model: {', '.join(self.get_available_speakers())}")
+        logger.info(f"Sample rate set to the highest available: {self.sample_rate}")
+
+    
+    def change_speaker(self, speaker):
+        if speaker not in self.get_available_speakers():
+            logger.error(f"Speaker '{speaker}' is not supported for the current model '{self.model_id}'.")
+            logger.info(f"Available speakers for this model: {', '.join(self.get_available_speakers())}")
+            return
+
+        self.speaker = speaker
+        logger.success(f"Speaker changed to: {speaker}")
+
+
+    def change_sample_rate(self, sample_rate):
+        available_sample_rates = self.get_available_sample_rates()
+
+        if sample_rate not in available_sample_rates:
+            logger.error(f"Sample rate {sample_rate} is not supported for the current model '{self.model_id}'.")
+            logger.info(f"Available sample rates for this model: {', '.join(map(str, available_sample_rates))}")
+            return
+
+        self.sample_rate = sample_rate
+        logger.success(f"Sample rate changed to: {sample_rate}")
+
     def init_model(self):
         logger.info("Initializing model")
         t0 = timeit.default_timer()

@@ -86,23 +86,54 @@ You can also integrate Silero TTS into your own Python projects by importing the
 ```python
 from silero_tts.silero_tts import SileroTTS
 
+# Get available models
+models = SileroTTS.get_available_models()
+print("Available models:", models)
+
+# Get available languages
+languages = SileroTTS.get_available_languages()
+print("Available languages:", languages)
+
+# Get the latest model for a specific language
+latest_model = SileroTTS.get_latest_model('ru')
+print("Latest model for Russian:", latest_model)
+
+# Get available sample rates for a specific model and language
+sample_rates = SileroTTS.get_available_sample_rates_static('ru', latest_model)
+print("Available sample rates for the latest Russian model:", sample_rates)
+
 # Initialize the TTS object
-tts = SileroTTS(model_id='v3_en', language='en', speaker='en_3', sample_rate=48000, device='cpu')
+tts = SileroTTS(model_id='v3_en', language='en', speaker='en_2', sample_rate=48000, device='cpu')
 
 # Synthesize speech from text
-text = "Hello, world!"
+text = "Hello world!"
 tts.tts(text, 'output.wav')
 
 # Synthesize speech from a text file
 # tts.from_file('input.txt', 'output.wav')
 
-# Get available models
-models = SileroTTS.get_available_models()
-print(models)
-
-# Get available speakers for a model
+# Get available speakers for the current model
 speakers = tts.get_available_speakers()
-print(speakers)
+print("Available speakers for the current model:", speakers)
+
+# Change the language
+tts.change_language('en')
+print("Language changed to:", tts.language)
+print("New model ID:", tts.model_id)
+print("New available speakers:", tts.get_available_speakers())
+
+# Change the model
+tts.change_model('v3_en')
+print("Model changed to:", tts.model_id)
+print("New available speakers:", tts.get_available_speakers())
+
+# Change the speaker
+tts.change_speaker('en_0')
+print("Speaker changed to:", tts.speaker)
+
+# Change the sample rate
+tts.change_sample_rate(24000)
+print("Sample rate changed to:", tts.sample_rate)
 ```
 
 ## CLI Features
