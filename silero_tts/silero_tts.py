@@ -52,9 +52,12 @@ class SileroTTS:
         logger.success(f"Models config loaded from: {models_file}")
         return models_config
 
-    def download_models_config(self, models_file):
+    def download_models_config(self, models_file=None):
         url = "https://raw.githubusercontent.com/snakers4/silero-models/master/models.yml"
         response = requests.get(url)
+        
+        if models_file is None:
+            models_file = os.path.join(os.path.dirname(__file__), 'models.yml')
 
         if response.status_code == 200:
             with open(models_file, 'w', encoding='utf-8') as f:
@@ -220,7 +223,7 @@ class SileroTTS:
 
         if not os.path.exists(models_file):
             logger.warning(f"Models config file not found: {models_file}. Downloading...")
-            SileroTTS.download_models_config(models_file)
+            SileroTTS.download_models_config_static(models_file)
 
         with open(models_file, 'r', encoding='utf-8') as f:
             models_config = yaml.safe_load(f)
@@ -237,7 +240,7 @@ class SileroTTS:
 
         if not os.path.exists(models_file):
             logger.warning(f"Models config file not found: {models_file}. Downloading...")
-            SileroTTS.download_models_config(models_file)
+            SileroTTS.download_models_config_static(models_file)
 
         with open(models_file, 'r', encoding='utf-8') as f:
             models_config = yaml.safe_load(f)
@@ -249,15 +252,32 @@ class SileroTTS:
     @staticmethod
     def get_available_languages():
         models_file = os.path.join(os.path.dirname(__file__), 'latest_silero_models.yml')
-
+    
         if not os.path.exists(models_file):
             logger.warning(f"Models config file not found: {models_file}. Downloading...")
-            SileroTTS.download_models_config(models_file)
-
+            SileroTTS.download_models_config_static(models_file)
+    
         with open(models_file, 'r', encoding='utf-8') as f:
             models_config = yaml.safe_load(f)
-
+    
         return list(models_config['tts_models'].keys())
+            
+    
+    @staticmethod
+    def download_models_config_static(models_file=None):
+        url = "https://raw.githubusercontent.com/snakers4/silero-models/master/models.yml"
+        response = requests.get(url)
+        
+        if models_file is None:
+            models_file = os.path.join(os.path.dirname(__file__), 'models.yml')
+
+        if response.status_code == 200:
+            with open(models_file, 'w', encoding='utf-8') as f:
+                f.write(response.text)
+            logger.success(f"Models config file downloaded: {models_file}")
+        else:
+            logger.error(f"Failed to download models config file. Status code: {response.status_code}")
+            raise Exception(f"Failed to download models config file. Status code: {response.status_code}")
 
 
 if __name__== '__main__':

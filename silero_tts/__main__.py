@@ -21,6 +21,13 @@ def main():
     args = parser.parse_args()
 
     try:
+         
+        models_file = os.path.join(os.path.dirname(__file__), 'latest_silero_models.yml')
+
+        if not os.path.exists(models_file):
+            logger.warning(f"Models config file not found: {models_file}. Downloading...")
+            SileroTTS.download_models_config_static(models_file)
+        
         if args.list_models:
             models = SileroTTS.get_available_models()
             logger.info(f"Available models: {models}")
