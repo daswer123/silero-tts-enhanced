@@ -1,60 +1,145 @@
+# Silero TTS
 
-# About fork
-This is a completely reworked fork, thanks to the author silero_tts_standalone. 
-Below will be a part from the official README
+**README is available in the following languages:**
 
-# About silero_tts_standalone
-silero_tts_standalone is a simple script which can be used to TTS large text with [Silero TTS models](https://github.com/snakers4/silero-models) locally (do txt -> wav conversion).
+[![EN](https://img.shields.io/badge/EN-blue.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README.md)
+[![RU](https://img.shields.io/badge/RU-red.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README_RU.md)
 
-By default, script is configured for Russian texts, but it can be reconfigured for any language supported by Silero models.
+Silero TTS is a Python library that provides an easy way to synthesize speech from text using various Silero TTS models, languages, and speakers. It can be used as a standalone script or integrated into your own Python projects.
 
-In order to work with non-Russian texts you should comment out spell_digits() function and its call in preprocess_text(), or (better) rewrite it with a module supporting your language. You also should translate replacement strings in preprocess_text() according to your text language.
+## Features
 
-The script was created to operate with large texts (over 1 MiB) but can handle small texts too.
+- Support for multiple languages and models
+- Automatic downloading of the latest model configuration file
+- Text preprocessing and transliteration
+- Batch processing of text files
+- Detailed logging with loguru
+- Progress tracking with tqdm
+- Customizable options for sample rate, device, and more
+- Can be used as a standalone script or integrated into Python code
 
-It provides the following features:
+## Installation
 
-* Basic text preprocessing (replace unsupported by model characters to supported, replace digits like 11 with "одиннадцать" to TTS them, limit line length according to punctuation)
-* WAV file size limiting (WAV format is limited to 4 GiB file size) according to sentences (no awkward mid-word splits)
-* Verbose run-time output with runtime estimation, full TTS size and length estimation and timestamps for each TTSed line
+### Auto ( Recomended )
+ 
+   ```
+   pip install silero-tts
+   ```
 
-Usage:
-   ./tts.py text.txt
+### Manualy
+1. Clone the repository:
+   ```
+   git clone https://github.com/daswer123/silero-tts-enhanced
+   ```
 
-The script was tested only with UTF-8 texts.
+2. Install the required dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-During runtime, it will output the following lines:
+## Usage
 
-3/341 0:00:05/0:17:04 469/96065 chars 2/522 MiB 0:00:27/1:32:10 TTS 0:00:27@part0 0.5% : В ответ
+### As a Standalone Script
 
-* 3 - current line number
-* 341 - total lines count
-* 0:00:05 - elapsed time
-* 0:17:04 - estimated time
-* 469 - processed characters
-* 96065 - total characters
-* 2 - WAV size already written to output files (total)
-* 522 - estimated WAV sizes (total)
-* 0:00:27 - line timestamp (total)
-* 1:32:10 - estimated length of all files
-* 0:00:27 - line timestamp in current WAV file
-* part0 - current WAV file number
-* 0.5% - progress
-* В ответ - processed string
+You can use Silero TTS as a standalone script to synthesize speech from text files or directories containing text files.
 
-Estimations may be inaccurate right after start, but after ~1 minute it will be more or less reliable.
+```
+python -m silero_tts [options]
+```
 
-Script will output the following files:
+#### Options
 
-+ ${INPUT_FILENAME}\_preprocessed.txt - preprocessed text (it will be TTSed)
-+ ${INPUT_FILENAME}\_0.wav
-+ ${INPUT_FILENAME}\_1.wav
-+ ... - TTS result
+- `--list-models`: List available models
+- `--list-speakers`: List available speakers for a model
+- `--language LANGUAGE`: Specify the language code (required)
+- `--model MODEL`: Specify the model ID (default: latest version for the language)
+- `--speaker SPEAKER`: Specify the speaker name (default: first available speaker for the model)
+- `--sample-rate SAMPLE_RATE`: Specify the sample rate (default: 48000)
+- `--device DEVICE`: Specify the device to use (default: cpu)
+- `--text TEXT`: Specify the text to synthesize
+- `--input-file INPUT_FILE`: Specify the input text file to synthesize
+- `--input-dir INPUT_DIR`: Specify the input directory with text files to synthesize
+- `--output-file OUTPUT_FILE`: Specify the output audio file (default: output.wav)
+- `--output-dir OUTPUT_DIR`: Specify the output directory for synthesized audio files (default: output)
 
-Requirements:
+#### Examples
 
-* Python 3.10.7+ (may work on earlier versions, but not tested)
-* pytorch
-* numpy
-* [num2t4ru](https://github.com/seriyps/ru_number_to_text/tree/master/num2t4ru) (for spell_digits())
+1. Synthesize speech from a text:
+   ```
+   python silero_tts.py --language ru --text "Привет, мир!"
+   ```
 
+2. Synthesize speech from a text file:
+   ```
+   python silero_tts.py --language en --input-file input.txt --output-file output.wav
+   ```
+
+3. Synthesize speech from multiple text files in a directory:
+   ```
+   python silero_tts.py --language es --input-dir texts --output-dir audio
+   ```
+
+### As a Python Library
+
+You can also integrate Silero TTS into your own Python projects by importing the `SileroTTS` class and using its methods.
+
+```python
+from silero_tts.silero_tts import SileroTTS
+
+# Initialize the TTS object
+tts = SileroTTS(model_id='v3_en', language='en', speaker='en_3', sample_rate=48000, device='cpu')
+
+# Synthesize speech from text
+text = "Hello, world!"
+tts.tts(text, 'output.wav')
+
+# Synthesize speech from a text file
+# tts.from_file('input.txt', 'output.wav')
+
+# Get available models
+models = SileroTTS.get_available_models()
+print(models)
+
+# Get available speakers for a model
+speakers = tts.get_available_speakers()
+print(speakers)
+```
+
+## CLI Features
+
+The Silero TTS CLI provides the following features:
+
+- **Language Support**: Specify the language code using the `--language` flag to synthesize speech in the desired language.
+- **Model Selection**: Choose a specific model using the `--model` flag or let the CLI automatically select the latest model for the specified language.
+- **Speaker Selection**: Select a speaker using the `--speaker` flag or use the default speaker for the chosen model.
+- **Sample Rate**: Customize the sample rate of the synthesized speech using the `--sample-rate` flag.
+- **Device**: Specify the device (CPU or GPU) to use for synthesis using the `--device` flag.
+- **Text Input**: Provide the text to synthesize directly using the `--text` flag or specify an input text file using the `--input-file` flag.
+- **Batch Processing**: Process multiple text files in a directory using the `--input-dir` flag.
+- **Output**: Specify the output audio file using the `--output-file` flag or the output directory for batch processing using the `--output-dir` flag.
+- **Model Listing**: List all available models using the `--list-models` flag.
+- **Speaker Listing**: List all available speakers for a specific model using the `--list-speakers` flag.
+
+## Supported Languages
+
+- Russian (ru)
+- English (en)
+- German (de)
+- Spanish (es)
+- French (fr)
+- Bashkir (ba)
+- Kalmyk (xal)
+- Tatar (tt)
+- Uzbek (uz)
+- Ukrainian (ua)
+- Indic (indic)
+- Cyrillic (cyrillic)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Acknowledgements
+
+- [Silero Models](https://github.com/snakers4/silero-models) for providing the TTS models
+- [silero_tts_standalone](https://github.com/S-trace/silero_tts_standalone) this library inspired me to create this project.

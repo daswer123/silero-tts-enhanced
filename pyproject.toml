@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling","hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "silero-tts"
+version = "0.0.1"
+authors = [
+  { name="daswer123", email="daswerq123@gmail.com" },
+]
+description = "Script over the official Silero so that it can be conveniently and quickly used from the code or from the console"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "torch",
+  "torchaudio",
+  "omegaConf",
+  "number2text",
+  "pyyaml",
+  "requests",
+  "numpy",
+  "tqdm",
+  "loguru",
+]
+
+[project.urls]
+Homepage = "https://github.com/daswer123/silero_cli"
+"Bug Tracker" = "https://github.com/daswer123/silero_cli/issues"
+
+[tool.hatch.build.targets.wheel]
+only-include=["silero_tts"]
