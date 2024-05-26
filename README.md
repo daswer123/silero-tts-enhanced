@@ -2,8 +2,8 @@
 
 **README is available in the following languages:**
 
-[![EN](https://img.shields.io/badge/EN-blue.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README.md)
-[![RU](https://img.shields.io/badge/RU-red.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README_RU.md)
+[![EN](https://img.shields.io/badge/EN-blue.svg)](https://github.com/daswer123/silero-tts-enhanced)
+[![RU](https://img.shields.io/badge/RU-red.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README_RU.MD)
 
 Silero TTS is a Python library that provides an easy way to synthesize speech from text using various Silero TTS models, languages, and speakers. It can be used as a standalone script or integrated into your own Python projects.
 
