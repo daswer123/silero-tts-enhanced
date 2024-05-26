@@ -2,8 +2,8 @@
 
 **README доступен на следующих языках:**
 
-[![EN](https://img.shields.io/badge/EN-blue.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README.md)
-[![RU](https://img.shields.io/badge/RU-red.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README_RU.md)
+[![EN](https://img.shields.io/badge/EN-blue.svg)](https://github.com/daswer123/silero-tts-enhanced)
+[![RU](https://img.shields.io/badge/RU-red.svg)](https://github.com/daswer123/silero-tts-enhanced/blob/main/README_RU.MD)
 
 Silero TTS Enhanced - это библиотека Python, которая предоставляет удобный способ синтеза речи из текста с использованием различных моделей Silero TTS, языков и голосов. Она может использоваться как автономный скрипт или интегрироваться в ваши собственные проекты на Python.
 
