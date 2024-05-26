@@ -87,7 +87,7 @@ python -m silero_tts [параметры]
 from silero_tts.silero_tts import SileroTTS
 
 # Инициализация объекта TTS
-tts = SileroTTS(model_id='v3_en', language='en', speaker='en_3', sample_rate=48000, device='cpu')
+tts = SileroTTS(model_id='v4_ru', language='ru', speaker='aidar', sample_rate=48000, device='cpu')
 
 # Синтез речи из текста
 text = "Привет, мир!"
