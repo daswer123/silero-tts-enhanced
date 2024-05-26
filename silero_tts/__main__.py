@@ -11,7 +11,7 @@ def main():
     parser.add_argument('--language', type=str, help='Language code')
     parser.add_argument('--model', type=str, help='Model ID (default: latest version for the language)')
     parser.add_argument('--speaker', type=str, help='Speaker name (default: first available speaker for the model)')
-    parser.add_argument('--sample-rate', type=int, default=48000, help='Sample rate (default: 48000)')
+    parser.add_argument('--sample-rate', type=int, help='Sample rate (default: highest available for the model)')
     parser.add_argument('--device', type=str, default='cpu', help='Device to use (default: cpu)')
     parser.add_argument('--text', type=str, help='Text to synthesize')
     parser.add_argument('--input-file', type=str, help='Input text file to synthesize')
@@ -21,13 +21,12 @@ def main():
     args = parser.parse_args()
 
     try:
-         
         models_file = os.path.join(os.path.dirname(__file__), 'latest_silero_models.yml')
 
         if not os.path.exists(models_file):
             logger.warning(f"Models config file not found: {models_file}. Downloading...")
             SileroTTS.download_models_config_static(models_file)
-        
+
         if args.list_models:
             models = SileroTTS.get_available_models()
             logger.info(f"Available models: {models}")
@@ -43,10 +42,22 @@ def main():
 
             if not args.model:
                 args.model = SileroTTS.get_latest_model(args.language)
-                logger.warning(f"Using the latest model for {args.language}: {args.model}")
+                logger.warning(f"Model not specified. Using the latest model for {args.language}: {args.model}")
                 logger.info(f"You can specify a different model using the --model flag.")
                 logger.info(f"Example: --model v4_ru")
                 logger.info(f"Available models for {args.language}: {', '.join(SileroTTS.get_available_models()[args.language])}")
+
+            if not args.sample_rate:
+                available_sample_rates = SileroTTS.get_available_sample_rates_static(args.language, args.model)
+                args.sample_rate = max(available_sample_rates)
+                logger.warning(f"Sample rate not specified. Using the highest available sample rate: {args.sample_rate}")
+            else:
+                available_sample_rates = SileroTTS.get_available_sample_rates_static(args.language, args.model)
+                if args.sample_rate not in available_sample_rates:
+                    logger.warning(f"The specified sample rate {args.sample_rate} is not supported by the model {args.model}.")
+                    logger.info(f"Available sample rates for this model: {', '.join(map(str, available_sample_rates))}")
+                    args.sample_rate = max(available_sample_rates)
+                    logger.info(f"Using the highest available sample rate: {args.sample_rate}")
 
             logger.info(f"Initializing TTS with model: {args.model}, language: {args.language}, speaker: {args.speaker}")
             tts = SileroTTS(model_id=args.model, language=args.language, speaker=args.speaker,
@@ -54,7 +65,7 @@ def main():
             logger.success(f"TTS initialized successfully.")
 
             if not args.speaker:
-                logger.warning(f"Using the default speaker: {tts.speaker}")
+                logger.warning(f"Speaker not specified. Using the default speaker: {tts.speaker}")
                 logger.info(f"You can specify a different speaker using the --speaker flag.")
                 logger.info(f"Example: --speaker aidar")
                 logger.info(f"Available speakers for model {args.model}: {', '.join(tts.get_available_speakers())}")
@@ -91,5 +102,5 @@ def main():
     except Exception as e:
         logger.exception(f"An error occurred: {str(e)}")
 
-if __name__ == '__main__':
+if __name__== '__main__':
     main()

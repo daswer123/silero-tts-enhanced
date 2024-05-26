@@ -69,6 +69,15 @@ class SileroTTS:
 
     def get_available_speakers(self):
         return self.tts_model.speakers
+    
+    def get_available_sample_rates(self):
+        model_config = self.models_config['tts_models'][self.language][self.model_id]['latest']
+        sample_rates = model_config.get('sample_rate', [])
+
+        if not isinstance(sample_rates, list):
+            sample_rates = [sample_rates]
+
+        return sample_rates
 
     def validate_model(self):
         model_config = self.models_config['tts_models'][self.language][self.model_id]['latest']
@@ -252,14 +261,14 @@ class SileroTTS:
     @staticmethod
     def get_available_languages():
         models_file = os.path.join(os.path.dirname(__file__), 'latest_silero_models.yml')
-    
+
         if not os.path.exists(models_file):
             logger.warning(f"Models config file not found: {models_file}. Downloading...")
             SileroTTS.download_models_config_static(models_file)
-    
+
         with open(models_file, 'r', encoding='utf-8') as f:
             models_config = yaml.safe_load(f)
-    
+
         return list(models_config['tts_models'].keys())
             
     
@@ -278,6 +287,26 @@ class SileroTTS:
         else:
             logger.error(f"Failed to download models config file. Status code: {response.status_code}")
             raise Exception(f"Failed to download models config file. Status code: {response.status_code}")
+
+
+    @staticmethod
+    def get_available_sample_rates_static(language, model_id):
+        models_file = os.path.join(os.path.dirname(__file__), 'latest_silero_models.yml')
+
+        if not os.path.exists(models_file):
+            logger.warning(f"Models config file not found: {models_file}. Downloading...")
+            SileroTTS.download_models_config_static(models_file)
+
+        with open(models_file, 'r', encoding='utf-8') as f:
+            models_config = yaml.safe_load(f)
+
+        model_config = models_config['tts_models'][language][model_id]['latest']
+        sample_rates = model_config.get('sample_rate', [])
+
+        if not isinstance(sample_rates, list):
+            sample_rates = [sample_rates]
+
+        return sample_rates
 
 
 if __name__== '__main__':

@@ -161,3 +161,4 @@ cython_debug/
 output.wav
 silero_tts/latest_silero_models.yml
 /tests/tests_temp
+test.py
