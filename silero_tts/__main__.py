@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 from loguru import logger
 from tqdm import tqdm
 from silero_tts.silero_tts import SileroTTS
@@ -18,7 +19,18 @@ def main():
     parser.add_argument('--input-dir', type=str, help='Input directory with text files to synthesize')
     parser.add_argument('--output-file', type=str, default='output.wav', help='Output audio file (default: output.wav)')
     parser.add_argument('--output-dir', type=str, default='output', help='Output directory for synthesized audio files (default: output)')
+    parser.add_argument('--log-level', type=str, default='INFO', help='Logging level (default: INFO)')
     args = parser.parse_args()
+
+    # Set logging level
+    logger.remove()
+    
+    
+    if (args.log_level.upper() == "NONE"):
+        logger.remove()
+        # logger = None
+    else:
+        logger.add(sys.stderr, level=args.log_level.upper())
 
     try:
         models_file = os.path.join(os.path.dirname(__file__), 'latest_silero_models.yml')
@@ -102,5 +114,5 @@ def main():
     except Exception as e:
         logger.exception(f"An error occurred: {str(e)}")
 
-if __name__== '__main__':
+if __name__ == '__main__':
     main()

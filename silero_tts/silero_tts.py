@@ -1,22 +1,18 @@
 import os
 import re
 import timeit
-from urllib import request
 import torch
-import sys
 import wave
 import yaml
 import requests
 from loguru import logger
-from datetime import datetime, timedelta
 from number2text.number2text import NumberToText
-
 from silero_tts.lang_data import is_cyrillic, is_latin, lang_data
 from silero_tts.transliterate import reverse_transliterate, transliterate
 
 class SileroTTS:
     def __init__(self, model_id: str, language: str, speaker: str = None, sample_rate: int = 48000, device: str = 'cpu',
-             put_accent=True, put_yo=True, num_threads=6):
+                 put_accent=True, put_yo=True, num_threads=6):
         self.model_id = model_id
         self.language = language
         self.sample_rate = sample_rate
@@ -26,7 +22,7 @@ class SileroTTS:
         self.num_threads = num_threads
 
         self.models_config = self.load_models_config()
-        self.tts_model, _= self.init_model()
+        self.tts_model = self.init_model()
 
         if speaker is None:
             self.speaker = self.tts_model.speakers[0]
@@ -152,36 +148,57 @@ class SileroTTS:
         logger.info("Initializing model")
         t0 = timeit.default_timer()
 
-        # https://github.com/snakers4/silero-models/issues/183
-        torch._C._jit_set_profiling_mode(False)  # Fixes initial delay
-
         if not torch.cuda.is_available() and self.device == "auto":
             self.device = 'cpu'
-        if torch.cuda.is_available() and self.device == "auto" or self.device == "cuda":
+        if torch.cuda.is_available() and (self.device == "auto" or self.device == "cuda"):
             torch_dev = torch.device("cuda", 0)
-            gpus_count = torch.cuda.device_count()  # 1
+            gpus_count = torch.cuda.device_count()
             logger.info(f"Using {gpus_count} GPU(s)...")
         else:
             torch_dev = torch.device(self.device)
         torch.set_num_threads(self.num_threads)
-        tts_model, _= torch.hub.load(repo_or_dir='snakers4/silero-models',
-                                      model='silero_tts',
-                                      language=self.language,
-                                      speaker=self.model_id)
-        logger.info(f"Setup takes {timeit.default_timer() - t0:.2f} seconds")
 
+        # Create silero_models directory
+        silero_models_dir = os.path.join(os.path.dirname(__file__), 'silero_models')
+        if not os.path.exists(silero_models_dir):
+            os.makedirs(silero_models_dir)
+
+        # Get package URL from models config
+        package_url = self.models_config['tts_models'][self.language][self.model_id]['latest']['package']
+
+        # Define model file path
+        model_file_name = f"{self.model_id}_{self.language}.pt"
+        model_file_path = os.path.join(silero_models_dir, model_file_name)
+
+        # Download model file if not exists
+        if not os.path.exists(model_file_path):
+            logger.info(f"Downloading model from {package_url} to {model_file_path}")
+            response = requests.get(package_url, stream=True)
+            if response.status_code == 200:
+                with open(model_file_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                logger.success(f"Model downloaded successfully.")
+            else:
+                logger.error(f"Failed to download model file. Status code: {response.status_code}")
+                raise Exception(f"Failed to download model file. Status code: {response.status_code}")
+
+        # Load model from local file
         logger.info("Loading model")
         t1 = timeit.default_timer()
-        tts_model.to(torch_dev)  # gpu or cpu
+        from torch.package import PackageImporter
+        model = PackageImporter(model_file_path).load_pickle("tts_models", "model")
+        model.to(torch_dev)
         logger.info(f"Model to device takes {timeit.default_timer() - t1:.2f} seconds")
 
-        if torch.cuda.is_available() and self.device == "auto" or self.device == "cuda":
+        if torch.cuda.is_available() and (self.device == "auto" or self.device == "cuda"):
             logger.info("Synchronizing CUDA")
             t2 = timeit.default_timer()
             torch.cuda.synchronize()
             logger.info(f"Cuda Synch takes {timeit.default_timer() - t2:.2f} seconds")
         logger.success("Model is loaded")
-        return tts_model, _
+
+        return model
 
     def find_char_positions(self, string: str, char: str) -> list:
         pos = []  # list to store positions for each 'char' in 'string'

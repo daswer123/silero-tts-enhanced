@@ -61,6 +61,7 @@ python -m silero_tts [options]
 - `--input-dir INPUT_DIR`: Specify the input directory with text files to synthesize
 - `--output-file OUTPUT_FILE`: Specify the output audio file (default: output.wav)
 - `--output-dir OUTPUT_DIR`: Specify the output directory for synthesized audio files (default: output)
+- `--log-level INFO` : Specify log-level, you can turn off use NONE value (default: INFO)
 
 #### Examples
 
